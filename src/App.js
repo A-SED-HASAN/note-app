@@ -16,15 +16,18 @@ function App() {
   const [name, setName] = useState('')
   const [list, setList] = useState(getLocalStorage())
   const [isEditing, setIsEditing] = useState(false)
+  const [deletable, setDeletable] = useState(true)
   const [editID, setEditID] = useState(null)
-  const [alert, setAlert] = useState({
-    show: false,
-    msg: '',
-    type: '',
-  })
+  const [alert, setAlert] = useState({ show: false, msg: '', type: '' })
 
-  const submitHandler = (e) => {
-    e.preventDefault()
+  const submitWithEnter = (e) => {
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        submitHandler()
+      }
+    })
+  }
+  const submitHandler = () => {
     if (!name) {
       showAlert(true, 'danger', 'please enter value')
     } else if (name && isEditing) {
@@ -36,6 +39,7 @@ function App() {
           return item
         })
       )
+      setDeletable(true)
       setName('')
       setEditID(null)
       setIsEditing(false)
@@ -44,7 +48,7 @@ function App() {
       showAlert(true, 'success', 'item Added to the list')
       const newItem = {
         id: new Date().getTime().toString(),
-        title: name,
+        title: name.trim(),
       }
       setList([newItem, ...list])
       setName('')
@@ -54,16 +58,22 @@ function App() {
     setAlert({ show, msg, type })
   }
   const clearList = () => {
-    showAlert(true, 'danger', 'empty List')
+    showAlert(true, 'danger', 'All Notes Cleared !')
+    setName('')
     setList([])
+    setIsEditing(false)
   }
   const removeItem = (id) => {
-    showAlert(true, 'danger', 'item removed')
-    setList(list.filter((item) => item.id !== id))
+    if (deletable) {
+      showAlert(true, 'danger', 'Item Removed From Todo')
+      setList(list.filter((item) => item.id !== id))
+    } else {
+      showAlert(true, 'danger', 'you want delete it or edit it?')
+    }
   }
-
   const editItem = (id) => {
     const specificItem = list.find((item) => item.id === id)
+    setDeletable(false)
     setIsEditing(true)
     setEditID(id)
     setName(specificItem.title)
@@ -76,10 +86,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('list', JSON.stringify(list))
   }, [list])
+  submitWithEnter()
   return (
     <>
       <section className='section-center '>
-        <h2>📝 Note app </h2>
+        <h2>{darkMode ? '📝' : '📓'} Note app </h2>
 
         <button type='button' className='btn' onClick={darkModeHandler}>
           {darkMode ? <BsSun /> : <BsMoon className='moon' />}
@@ -88,10 +99,16 @@ function App() {
         {alert.show && <Alert {...alert} removeAlert={showAlert} list={list} />}
       </section>
       <section className='section-center'>
-        <form onSubmit={submitHandler} className='grocery-form'>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            submitHandler()
+          }}
+          className='grocery-form'>
           <div className='form-control'>
             <textarea
-              placeholder='your note here ...'
+              placeholder='your note here ... 
+* you can add with ctrl + enter *'
               value={name}
               onChange={(e) => setName(e.target.value)}
               className='note-input'></textarea>
