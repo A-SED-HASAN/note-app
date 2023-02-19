@@ -62,6 +62,7 @@ function App() {
     setName('')
     setList([])
     setIsEditing(false)
+    setDeletable(true)
   }
   const removeItem = (id) => {
     if (deletable) {
