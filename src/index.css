@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap');
 /*
 =============== 
 Variables
@@ -32,7 +33,7 @@ Variables
   --clr-grey-10: hsl(210, 36%, 96%);
   --clr-white: #fff;
   --clr-white-lower: #333;
-  --clr-red-dark: hsl(360, 67%, 44%);
+  --clr-red-dark: hsl(0, 67%, 44%);
   --clr-red-light: hsl(360, 71%, 66%);
   --clr-green-dark: hsl(125, 67%, 44%);
   --clr-green-light: hsl(125, 90%, 50%);
@@ -44,6 +45,9 @@ Variables
   --dark-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   --max-width: 1170px;
   --fixed-width: 620px;
+  --font: 'sans-serif';
+  --size: 0.875rem;
+  --size-bigger-screen: 1rem;
 }
 .dark-mode {
   --clr-silver-2: hsl(0, 0%, 50%);
@@ -56,6 +60,19 @@ Variables
   --clr-grey-10: hsl(0, 0%, 65%);
 
   --clr-white: #5d5d5d;
+  --light-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  --dark-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+.font-mode {
+  --font: 'Amatic SC';
+}
+.font-size-plus {
+  --size: 1.5rem;
+  --size-bigger-screen: 1.7rem;
+}
+.font-size-minus {
+  --size: 0.5rem;
+  --size-bigger-screen: 0.7rem;
 }
 /*
 =============== 
@@ -71,11 +88,11 @@ Global Styles
   box-sizing: border-box;
 }
 body {
-  font-family: sans-serif;
+  font-family: var(--font);
   background: var(--clr-grey-10);
   color: var(--clr-grey-1);
   line-height: 1.5;
-  font-size: 0.875rem;
+  font-size: var(--size);
   transition: all 0.3s;
 }
 
@@ -113,29 +130,6 @@ p {
   margin-bottom: 1.25rem;
   color: var(--clr-grey-5);
 }
-@media screen and (min-width: 800px) {
-  h1 {
-    font-size: 4rem;
-  }
-  h2 {
-    font-size: 2.5rem;
-  }
-  h3 {
-    font-size: 1.75rem;
-  }
-  h4 {
-    font-size: 1rem;
-  }
-  body {
-    font-size: 1rem;
-  }
-  h1,
-  h2,
-  h3,
-  h4 {
-    line-height: 1;
-  }
-}
 .btn {
   text-transform: uppercase;
   background: transparent;
@@ -156,6 +150,21 @@ p {
 .btn:hover {
   color: var(--clr-white);
   background: var(--clr-silver-6);
+}
+.font {
+  top: 100%;
+  right: 0%;
+  transform: translate(-20%, -120%);
+}
+.size-plus {
+  top: 0%;
+  right: 100%;
+  transform: translate(120%, 20%);
+}
+.size-minus {
+  top: 100%;
+  right: 100%;
+  transform: translate(120%, -120%);
 }
 .selected {
   color: var(--clr-white);
@@ -185,7 +194,7 @@ main {
 }
 /*
 =============== 
-Grocery List
+Note App 
 ===============
 */
 .section-center {
@@ -204,6 +213,7 @@ Grocery List
   text-align: center;
 }
 .alert {
+  text-transform: capitalize;
   transition: 1s all;
   margin-top: 1rem;
   height: 1.25rem;
@@ -219,11 +229,29 @@ Grocery List
   color: #721c24;
   background: #f8d7da;
 }
+.alert-info {
+  color: #161557;
+  background: #d4daed;
+}
 .alert-success {
   color: #155724;
   background: #d4edda;
 }
-
+.router {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 1rem;
+}
+.router button {
+  font-size: 1.2rem;
+  margin: 0;
+  color: var(--clr-primary-1);
+  font-family: var(--font);
+}
+.router button.selected {
+  color: var(--clr-red-dark);
+}
 .form-control {
   display: flex;
   justify-content: center;
@@ -244,13 +272,14 @@ Grocery List
   text-transform: capitalize;
 }
 .note-input::placeholder {
-  font-family: var(--ff-secondary);
+  font-family: var(--font);
   color: var(--clr-grey-5);
   text-align: center;
   font-size: 0.8rem;
 }
 
 .submit-btn {
+  font-family: var(--font);
   background: var(--clr-silver-3);
   color: var(--clr-silver-9);
   border-color: transparent;
@@ -361,7 +390,9 @@ Grocery List
 .clear-btn:hover {
   color: var(--clr-red-dark);
 }
-
+.moon {
+  color: #fff;
+}
 @media (width>= 992px) {
   .note-input {
     height: 200px;
@@ -370,6 +401,29 @@ Grocery List
     font-size: 1.4rem;
   }
 }
-.moon {
-  color: #fff;
+@media screen and (min-width: 800px) {
+  .router button {
+    font-size: var(--size-bigger-screen);
+  }
+  h1 {
+    font-size: 4rem;
+  }
+  h2 {
+    font-size: 2.5rem;
+  }
+  h3 {
+    font-size: 1.75rem;
+  }
+  h4 {
+    font-size: 1rem;
+  }
+  body {
+    font-size: var(--size-bigger-screen);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1;
+  }
 }

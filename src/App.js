@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from 'react'
-import List from './List'
+import List from './Lists/List'
 import Alert from './Alert'
+import ShowHistory from './Lists/ShowHistory'
+
+import {
+  plusFontSize,
+  normalFontSize,
+  getNotes,
+  getDeletedNotes,
+} from './functions'
+
 import { BsSun, BsMoon } from 'react-icons/bs'
-const getLocalStorage = () => {
-  let list = localStorage.getItem('list')
-  if (list) {
-    return JSON.parse(localStorage.getItem('list'))
-  } else {
-    return []
-  }
-}
+import { SiGooglefonts } from 'react-icons/si'
+import { BiFont, BiPlus } from 'react-icons/bi'
+import { GiBackwardTime } from 'react-icons/gi'
 
 function App() {
+  const [list, setList] = useState(getNotes())
+  const [deletedNotes, setDeletedNotes] = useState(getDeletedNotes())
   const [darkMode, setDarkMode] = useState(true)
+  const [fontMode, setFontMode] = useState(true)
   const [name, setName] = useState('')
-  const [list, setList] = useState(getLocalStorage())
   const [isEditing, setIsEditing] = useState(false)
   const [deletable, setDeletable] = useState(true)
   const [editID, setEditID] = useState(null)
   const [alert, setAlert] = useState({ show: false, msg: '', type: '' })
+  const [showWhat, setShowWhat] = useState('notes')
 
   const submitWithEnter = (e) => {
     window.addEventListener('keydown', (e) => {
@@ -28,7 +35,7 @@ function App() {
     })
   }
   const submitHandler = () => {
-    if (!name) {
+    if (!name || name === ' ') {
       showAlert(true, 'danger', 'please enter value')
     } else if (name && isEditing) {
       setList(
@@ -45,7 +52,7 @@ function App() {
       setIsEditing(false)
       showAlert(true, 'success', 'value changed')
     } else {
-      showAlert(true, 'success', 'item Added to the list')
+      showAlert(true, 'success', 'Item Added To The Notes')
       const newItem = {
         id: new Date().getTime().toString(),
         title: name.trim(),
@@ -60,14 +67,24 @@ function App() {
   const clearList = () => {
     showAlert(true, 'danger', 'All Notes Cleared !')
     setName('')
-    setList([])
+    setDeletedNotes([...list, ...deletedNotes])
     setIsEditing(false)
     setDeletable(true)
+    setList([])
+  }
+  const clearDeletedNotes = () => {
+    showAlert(true, 'danger', 'History Cleared !')
+    setDeletedNotes([])
   }
   const removeItem = (id) => {
     if (deletable) {
-      showAlert(true, 'danger', 'Item Removed From Todo')
+      showAlert(true, 'danger', 'Item Removed From notes')
       setList(list.filter((item) => item.id !== id))
+      const deletedItem = list.filter((item) => item.id === id)
+      setDeletedNotes([
+        { id: deletedItem[0].id, title: deletedItem[0].title },
+        ...deletedNotes,
+      ])
     } else {
       showAlert(true, 'danger', 'you want delete it or edit it?')
     }
@@ -84,9 +101,20 @@ function App() {
     setDarkMode(!darkMode)
     document.documentElement.classList.toggle('dark-mode')
   }
+  const fontModeHandler = () => {
+    document.querySelector('.font').classList.toggle('selected')
+    setFontMode(!fontMode)
+    document.documentElement.classList.toggle('font-mode')
+  }
+  const showTimeFromDone = (id) => {
+    const whoSID = deletedNotes.filter((item) => item.id === id)
+    return Number(whoSID[0].id)
+  }
   useEffect(() => {
     localStorage.setItem('list', JSON.stringify(list))
-  }, [list])
+    localStorage.setItem('deletedNotes', JSON.stringify(deletedNotes))
+  }, [list, deletedNotes])
+
   submitWithEnter()
   return (
     <>
@@ -96,36 +124,87 @@ function App() {
         <button type='button' className='btn' onClick={darkModeHandler}>
           {darkMode ? <BsSun /> : <BsMoon className='moon' />}
         </button>
-
+        <button type='button' className='btn font' onClick={fontModeHandler}>
+          {fontMode ? <BiFont /> : <SiGooglefonts className='moon' />}
+        </button>
+        <button type='button' className='btn size-plus' onClick={plusFontSize}>
+          <BiPlus />
+        </button>
+        <button
+          type='button'
+          className='btn size-minus'
+          onClick={normalFontSize}>
+          <GiBackwardTime />
+        </button>
         {alert.show && <Alert {...alert} removeAlert={showAlert} list={list} />}
       </section>
-      <section className='section-center'>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            submitHandler()
-          }}
-          className='grocery-form'>
-          <div className='form-control'>
-            <textarea
-              placeholder='your note here ... 
-* you can add with ctrl + enter *'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className='note-input'></textarea>
-            <button type='submit' className='submit-btn'>
-              {isEditing ? 'edit' : 'Add'}
-            </button>
-          </div>
-        </form>
+
+      <section className='section-center router'>
+        <button
+          className={`clear-btn ${showWhat === 'history' ? 'selected' : ''}`}
+          onClick={() => {
+            setShowWhat('history')
+          }}>
+          history
+        </button>
+        <button
+          className={`clear-btn ${showWhat === 'notes' ? 'selected' : ''}`}
+          onClick={() => {
+            setShowWhat('notes')
+          }}>
+          notes
+        </button>
       </section>
 
-      {list.length > 0 && (
+      {showWhat === 'notes' && (
         <section className='section-center'>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              submitHandler()
+            }}
+            className='grocery-form'>
+            <div className='form-control'>
+              <textarea
+                placeholder='your note here ... 
+* you can add with ctrl + enter *'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className='note-input'></textarea>
+              <button type='submit' className='submit-btn'>
+                {isEditing ? 'edit' : 'Add'}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+      {showWhat === 'notes' && list.length > 0 && (
+        <section className='section-center'>
+          <h2>notes</h2>
           <div className='grocery-container'>
             <List items={list} removeItem={removeItem} editItem={editItem} />
             <button className='clear-btn' onClick={clearList}>
               Clear All Notes
+            </button>
+          </div>
+        </section>
+      )}
+      {showWhat === 'history' && deletedNotes.length === 0 && (
+        <section className='section-center'>
+          <h2>nothing is here...</h2>
+        </section>
+      )}
+      {showWhat === 'history' && deletedNotes.length > 0 && (
+        <section className='section-center'>
+          <h2>history</h2>
+          <div className='grocery-container'>
+            <ShowHistory
+              items={deletedNotes}
+              showTimeFromDone={showTimeFromDone}
+              showAlert={showAlert}
+            />
+            <button className='clear-btn' onClick={clearDeletedNotes}>
+              Clear History
             </button>
           </div>
         </section>
